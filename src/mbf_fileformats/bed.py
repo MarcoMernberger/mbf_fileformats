@@ -1,6 +1,6 @@
 """sequence/chipseq formats"""
 import io
-from common import open_file, chunkify
+from .util import open_file, chunkify
 import numpy
 import pandas as pd
 import os
