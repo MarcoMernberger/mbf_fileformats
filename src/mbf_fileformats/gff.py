@@ -28,7 +28,7 @@ def _mapGFF(row):
                 x = x.split(b"=")
             else:
                 x = x.split()
-            res['attributes'][x[0]] = x[1:]
+            res['attributes'][x[0].decode('utf-8')] = [y.decode('utf-8') for y in x[1:]]
     return res
 
 
