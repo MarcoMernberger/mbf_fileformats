@@ -295,10 +295,12 @@ def read_bigbed(filename, chromosome_lengths, chromosome_mangler=lambda x: x):
             continue
         for entry in it:
             data["chr"].append(chr)
-            data["start"].append(entry.start)
-            data["stop"].append(entry.end)
+            data["start"].append(entry[0])
+            data["stop"].append(entry[1])
+            more = entry[2].split("\t")
+            strand = more[2]
             data["strand"].append(
-                1 if entry.strand == "+" else -1 if entry.strand == "-" else 0
+                1 if strand == "+" else -1 if strand == "-" else 0
             )
     bb.close()
     return pd.DataFrame(data)
