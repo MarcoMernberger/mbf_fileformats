@@ -163,7 +163,11 @@ def bed_to_bigbed(
     input_bed_filename, output_filename, chromosome_lengths, already_sorted=False
 ):
     """Convert an existing bed file into bigbed. Chromosome lengths is a dictionary"""
-    raise ValueError("TODO")
+    from mbf_externals.kent import BedToBigBed
+
+    algo = BedToBigBed()
+    algo.store.unpack_version(algo.name, algo.version)
+
     chrom_sizes_file = tempfile.NamedTemporaryFile(suffix=".sizes")
     for chr, length in sorted(chromosome_lengths.items()):
         chrom_sizes_file.write(("%s\t%i\n" % (chr, length)).encode("utf-8"))
@@ -214,7 +218,7 @@ def bed_to_bigbed(
         inputtf = input
     in_name = os.path.abspath(inputtf.name)
     cmd = [
-        os.path.join(bedToBigBedPath, "bedToBigBed"),
+        str(algo.path / "bedToBigBed"),
         "-tab",
         in_name,
         os.path.abspath(chrom_sizes_file.name),
@@ -286,7 +290,7 @@ def read_bigbed(filename, chromosome_lengths, chromosome_mangler=lambda x: x):
 
     bb = pyBigWig.open(filename)
     chr_lengths = chromosome_lengths
-    data = {"chr": [], "start": [], "stop": [], "strand": []}
+    data = {"chr": [], "start": [], "stop": [], "strand": [], "name": []}
     for chr in chr_lengths:
         it = bb.entries(chromosome_mangler(chr), 0, chr_lengths[chr])
         if it is None:  # no such chromosome. Tolerable if it's a contig or such.
@@ -299,8 +303,7 @@ def read_bigbed(filename, chromosome_lengths, chromosome_mangler=lambda x: x):
             data["stop"].append(entry[1])
             more = entry[2].split("\t")
             strand = more[2]
-            data["strand"].append(
-                1 if strand == "+" else -1 if strand == "-" else 0
-            )
+            data["strand"].append(1 if strand == "+" else -1 if strand == "-" else 0)
+            data["name"].append(more[0])
     bb.close()
     return pd.DataFrame(data)
